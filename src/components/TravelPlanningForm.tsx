@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, MapPin, Plane, Heart } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface DateRange {
   from?: Date;
@@ -20,11 +21,55 @@ export const TravelPlanningForm = () => {
   const [toCity, setToCity] = useState("");
   const [dateRange, setDateRange] = useState<DateRange>({});
   const [travelWishes, setTravelWishes] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the data to your backend
-    console.log({ fromCity, toCity, dateRange, travelWishes });
+    setIsLoading(true);
+
+    try {
+      const travelData = {
+        fromCity,
+        toCity,
+        arrivalDate: dateRange.from?.toISOString(),
+        departureDate: dateRange.to?.toISOString(),
+        travelWishes,
+        timestamp: new Date().toISOString(),
+      };
+
+      const response = await fetch(
+        "https://sergiysvirkov.app.n8n.cloud/webhook-test/a1717cc2-6b62-4683-b0c1-385d6d8191ef",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          mode: "no-cors",
+          body: JSON.stringify(travelData),
+        }
+      );
+
+      toast({
+        title: "Travel Request Sent!",
+        description: "Your Ukrainian adventure request has been submitted. We'll start generating your personalized itinerary.",
+      });
+
+      // Reset form
+      setFromCity("");
+      setToCity("");
+      setDateRange({});
+      setTravelWishes("");
+    } catch (error) {
+      console.error("Error sending travel data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send your travel request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -154,8 +199,9 @@ export const TravelPlanningForm = () => {
               size="lg" 
               variant="hero"
               className="w-full h-14 text-lg"
+              disabled={isLoading}
             >
-              Generate My Ukrainian Adventure
+              {isLoading ? "Generating Adventure..." : "Generate My Ukrainian Adventure"}
             </Button>
           </div>
         </form>
