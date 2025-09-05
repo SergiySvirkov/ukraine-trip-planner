@@ -12,44 +12,13 @@ interface TravelResultsProps {
     departureDate?: string;
     travelWishes: string;
     timestamp: string;
+    webhookResults?: any;
   };
 }
 
 export const TravelResults = ({ travelData }: TravelResultsProps) => {
-  const mockResults = [
-    {
-      id: 1,
-      title: "Historic City Center Tour",
-      description: "Explore the ancient architecture and cultural landmarks of your destination",
-      duration: "4-5 hours",
-      rating: 4.8,
-      category: "Culture & History"
-    },
-    {
-      id: 2,
-      title: "Traditional Ukrainian Cuisine Experience",
-      description: "Taste authentic local dishes and learn about Ukrainian culinary traditions",
-      duration: "2-3 hours",
-      rating: 4.9,
-      category: "Food & Drink"
-    },
-    {
-      id: 3,
-      title: "Local Markets & Artisan Shops",
-      description: "Discover handcrafted souvenirs and interact with local artisans",
-      duration: "3-4 hours",
-      rating: 4.7,
-      category: "Shopping"
-    },
-    {
-      id: 4,
-      title: "Nature & Parks Walking Tour",
-      description: "Enjoy the natural beauty and green spaces around the city",
-      duration: "2-3 hours",
-      rating: 4.6,
-      category: "Nature"
-    }
-  ];
+  // Display webhook results if available, otherwise show placeholder
+  const hasWebhookResults = travelData.webhookResults;
 
   return (
     <div className="space-y-6">
@@ -91,44 +60,31 @@ export const TravelResults = ({ travelData }: TravelResultsProps) => {
       {/* Search Results */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Recommended Experiences</CardTitle>
+          <CardTitle className="text-xl">
+            {hasWebhookResults ? "Your Personalized Travel Recommendations" : "Generating Recommendations..."}
+          </CardTitle>
           <p className="text-muted-foreground">
-            Based on your preferences, here are some great activities in {travelData.toCity}
+            {hasWebhookResults 
+              ? `Custom recommendations for your trip to ${travelData.toCity}`
+              : "Please wait while we generate your personalized travel recommendations..."
+            }
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {mockResults.map((result, index) => (
-            <div key={result.id}>
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-foreground">
-                      {result.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mt-1">
-                      {result.description}
-                    </p>
-                  </div>
-                  <Badge variant="secondary" className="shrink-0">
-                    {result.category}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    <span>{result.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-ukraine-yellow text-ukraine-yellow" />
-                    <span>{result.rating}</span>
-                  </div>
-                </div>
-              </div>
-              
-              {index < mockResults.length - 1 && <Separator className="mt-4" />}
+        <CardContent>
+          {hasWebhookResults ? (
+            <div className="space-y-4">
+              <pre className="whitespace-pre-wrap text-sm bg-muted/50 p-4 rounded-lg">
+                {JSON.stringify(travelData.webhookResults, null, 2)}
+              </pre>
             </div>
-          ))}
+          ) : (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ukraine-blue mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Analyzing your preferences...</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

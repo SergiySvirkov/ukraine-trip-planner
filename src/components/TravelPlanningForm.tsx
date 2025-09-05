@@ -24,6 +24,7 @@ interface TravelData {
   departureDate?: string;
   travelWishes: string;
   timestamp: string;
+  webhookResults?: any;
 }
 
 export const TravelPlanningForm = () => {
@@ -56,13 +57,21 @@ export const TravelPlanningForm = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          mode: "no-cors",
           body: JSON.stringify(travelData),
         }
       );
 
-      // Set search results to display
-      setSearchResults(travelData);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const webhookResponse = await response.json();
+      
+      // Set search results with webhook response
+      setSearchResults({
+        ...travelData,
+        webhookResults: webhookResponse
+      });
 
       toast({
         title: "Travel Request Sent!",
